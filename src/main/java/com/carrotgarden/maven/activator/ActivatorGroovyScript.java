@@ -1,14 +1,13 @@
 package com.carrotgarden.maven.activator;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Activate project profile based on Groovy property expression.
  */
-@Component( //
-		role = ActivatorAny.class, //
-		hint = Activator.GROOVYSCRIPT //
-)
+@Named(Activator.GROOVYSCRIPT)
+@Singleton
 public class ActivatorGroovyScript extends ActivatorBase {
 
 	@Override

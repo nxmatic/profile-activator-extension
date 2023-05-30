@@ -1,14 +1,14 @@
 package com.carrotgarden.maven.activator;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Activate project profile based on JavaScript property expression.
  */
-@Component( //
-		role = ActivatorAny.class, //
-		hint = Activator.JAVASCRIPT //
-)
+
+@Named(Activator.JAVASCRIPT)
+@Singleton
 public class ActivatorJavaScript extends ActivatorBase {
 
 	@Override

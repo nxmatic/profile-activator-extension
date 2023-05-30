@@ -1,14 +1,14 @@
 package com.carrotgarden.maven.activator;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Named;
+
+import com.google.inject.Singleton;
 
 /**
  * Activate project profile based on Scala property expression.
  */
-@Component( //
-		role = ActivatorAny.class, //
-		hint = Activator.SCALASCRIPT //
-)
+@Named(Activator.SCALASCRIPT)
+@Singleton
 public class ActivatorScalaScript extends ActivatorBase {
 
 	@Override

@@ -1,14 +1,14 @@
 package com.carrotgarden.maven.activator;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Activate project profile based on MVFLEX property expression.
  */
-@Component( //
-		role = ActivatorAny.class, //
-		hint = Activator.MVELSCRIPT //
-)
+
+@Named(Activator.MVELSCRIPT)
+@Singleton
 public class ActivatorMvelScript extends ActivatorBase {
 
 	@Override

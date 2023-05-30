@@ -2,27 +2,28 @@ package com.carrotgarden.maven.activator;
 
 import static com.carrotgarden.maven.activator.SupportFunction.*;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
+import org.apache.maven.model.building.DefaultModelBuilderFactory;
 import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.model.building.ModelBuildingRequest;
 import org.apache.maven.model.building.ModelBuildingResult;
 import org.apache.maven.model.building.ModelProblemCollector;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.activation.ProfileActivator;
-import org.codehaus.plexus.component.annotations.Requirement;
+import org.apache.maven.model.resolution.ModelResolver;
+import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.logging.Logger;
-import org.eclipse.aether.impl.RemoteRepositoryManager;
-
 import com.carrotgarden.maven.activator.SupportFunction.Identity;
 
 /**
@@ -33,20 +34,26 @@ public abstract class ActivatorBase implements ProfileActivator, ActivatorAny {
 	/**
 	 * Logger provided by Maven runtime.
 	 */
-	@Requirement
+	@Inject
 	protected Logger logger;
 
 	/**
 	 * Builder provided by Maven runtime.
 	 */
-	@Requirement
+	@Inject
 	protected ModelBuilder builder;
 
 	/**
-	 * Manager provided by Maven runtime.
+	 * Container provided by Maven runtime.
 	 */
-	@Requirement
-	protected RemoteRepositoryManager remoteManager;
+	@Inject
+	protected PlexusContainer container;
+
+	/**
+	 * Session provided by Maven runtime.
+	 */
+	@Inject
+	protected MavenSession session;
 
 	/**
 	 * Remember processed projects/profiles.
@@ -164,6 +171,10 @@ public abstract class ActivatorBase implements ProfileActivator, ActivatorAny {
 		processGuard.remove(identity);
 
 		if (result.valid) {
+			if (result.value) {
+				// make property activator happy
+				context.getUserProperties().put(propertyName(profile), propertyValue(profile));
+			}
 			return result.value;
 		} else {
 			return false;

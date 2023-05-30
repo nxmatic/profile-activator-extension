@@ -3,6 +3,8 @@ package com.carrotgarden.maven.activator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.file.attribute.UserPrincipalLookupService;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +17,15 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Profile;
+import org.apache.maven.model.building.DefaultModelBuilderFactory;
 import org.apache.maven.model.building.DefaultModelBuildingRequest;
+import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.model.building.ModelBuildingRequest;
+import org.apache.maven.model.building.ModelBuildingResult;
+import org.apache.maven.model.building.ModelCache;
 import org.apache.maven.model.building.ModelProblem.Severity;
 import org.apache.maven.model.building.ModelProblem.Version;
 import org.apache.maven.model.building.ModelProblemCollector;
@@ -28,6 +35,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.resolution.ModelResolver;
 import org.apache.maven.project.ProjectModelResolver;
+import org.codehaus.plexus.PlexusContainer;
 
 /**
  * Static activator functions.
@@ -143,11 +151,10 @@ public interface SupportFunction {
 	 * Default model resolution request.
 	 */
 	static ModelBuildingRequest buildRequest( //
-			ProfileActivationContext context //
-	) {
+			ProfileActivationContext context) {
+
 		ModelBuildingRequest request = new DefaultModelBuildingRequest();
-		// request.setModelResolver(modelResolver()); // TODO #2
-		//
+
 		request.setActiveProfileIds(context.getActiveProfileIds());
 		request.setInactiveProfileIds(context.getInactiveProfileIds());
 		//
@@ -157,12 +164,10 @@ public interface SupportFunction {
 		//
 		request.setLocationTracking(false);
 		request.setValidationLevel(ModelBuildingRequest.VALIDATION_LEVEL_MINIMAL);
-		return request;
-	}
+		// avoid resolver usage for now
+		request.setTwoPhaseBuilding(true); 
 
-	// TODO #2
-	static ModelResolver modelResolver() {
-		return null;
+		return request;
 	}
 
 	/**
@@ -402,6 +407,54 @@ public interface SupportFunction {
 		}
 		// Engine is missing.
 		return null;
+	}
+
+	static ProfileActivationContext mutableContext(ProfileActivationContext context) {
+		return new ProfileActivationContext() {
+
+			final List<String> activeProfileIds = new ArrayList<>(context.getActiveProfileIds());
+
+			@Override
+			public List<String> getActiveProfileIds() {
+				return activeProfileIds;
+			}
+
+			final List<String> inactiveProfileIds = new ArrayList<>(context.getInactiveProfileIds());
+
+			@Override
+			public List<String> getInactiveProfileIds() {
+				return inactiveProfileIds;
+			}
+
+			final Map<String, String> systemProperties = new HashMap<>(context.getSystemProperties());
+
+			@Override
+			public Map<String, String> getSystemProperties() {
+				return systemProperties;
+			}
+
+			final Map<String, String> userProperties = new HashMap<>(context.getUserProperties());
+
+			@Override
+			public Map<String, String> getUserProperties() {
+				return userProperties;
+			}
+
+			final Map<String, String> projectProperties = new HashMap<>(context.getProjectProperties());
+
+			@Override
+			public Map<String, String> getProjectProperties() {
+				return projectProperties;
+			}
+
+			@Override
+			public File getProjectDirectory() {
+				return context.getProjectDirectory();
+			}
+
+	
+
+		};
 	}
 
 }
